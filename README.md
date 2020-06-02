@@ -16,7 +16,7 @@ git clone git@github.com:levicruz49/curso_WTTD wttd
 cd wttd
 python -v venv .wttd
 source .wttd/bin/activate
-pip install - requirements.txt
+pip install - requirements-dev.txt
 cp contib/env-sample .env
 python manage.py test
 ```
