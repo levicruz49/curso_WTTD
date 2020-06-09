@@ -8,6 +8,7 @@ class ContactInline(admin.TabularInline):
     model = Contact
     extra = 1
 
+
 class SpeakerModelAdmin(admin.ModelAdmin):
     inlines = [ContactInline]
     prepopulated_fields = {'slug':('name',)}
@@ -30,6 +31,12 @@ class SpeakerModelAdmin(admin.ModelAdmin):
     website_link.short_description = 'WebSite'
     photo_img.short_description = 'Foto'
 
+
+class TalkModelAdmin(admin.ModelAdmin):
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.filter(course=None)
+
 admin.site.register(Speaker, SpeakerModelAdmin)
-admin.site.register(Talk)
+admin.site.register(Talk,TalkModelAdmin)
 admin.site.register(Course)

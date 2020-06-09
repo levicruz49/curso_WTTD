@@ -42,6 +42,9 @@ class TalkModelTest(TestCase):
     def test_str(self):
         self.assertEqual('Titulo da Palestra', str(self.talk))
 
+    def test_ordering(self):
+        self.assertListEqual(['start'], Talk._meta.ordering)
+
 class PeriodManagerTest(TestCase):
     def setUp(self):
         Talk.objects.create(title='Morning Talk', start='11:59')
@@ -59,7 +62,6 @@ class PeriodManagerTest(TestCase):
         qs = Talk.objects.at_afternoon()
         expected = ['Afternoon Talk']
         self.assertQuerysetEqual(qs, expected, lambda o: o.title)
-
 
 class CourseModelTest(TestCase):
     def setUp(self):
@@ -87,3 +89,6 @@ class CourseModelTest(TestCase):
 
     def test_manager(self):
         self.assertIsInstance(Course.objects, PeriodManager)
+
+    def test_ordering(self):
+        self.assertListEqual(['start'], Course._meta.ordering)
