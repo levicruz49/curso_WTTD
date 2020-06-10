@@ -1,51 +1,25 @@
-from django.conf import settings
-from django.contrib import messages
-from django.core.mail import send_mail
-from django.http import HttpResponseRedirect, Http404
-from django.shortcuts import render,resolve_url as r
-from django.template.loader import render_to_string
+from django.shortcuts import get_object_or_404
+from django.views.generic import DetailView
+from django.views.generic.edit import CreateView
+
 from eventex.subscriptions.forms import SubscriptionForm
+from eventex.subscriptions.mixins import EmailCreateMixin
 from eventex.subscriptions.models import Subscription
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
-
-def new(request):
-    if request.method == 'POST':
-        return create(request)
-
-    return empty_form(request)
 
 
-def empty_form(request):
-    return render(request, 'subscriptions/subscription_form.html',
-                  {'form': SubscriptionForm()})
+class EmailCreateView(EmailCreateMixin, CreateView):
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        self.send_mail()
+        return response
 
 
-def create(request):
-    form = SubscriptionForm(request.POST)
+new = EmailCreateView.as_view(model=Subscription,
+                              form_class=SubscriptionForm,
+                              email_subject='Confirmação de inscrição')
 
-    if not form.is_valid():
-        return render(request, 'subscriptions/subscription_form.html',
-                      {'form': form})
-    subscription = form.save()
 
-    _send_email('Confirmação de inscrição',
-                settings.DEFAULT_FROM_EMAIL,
-                subscription.email,
-                'subscriptions/subscription_email.txt',
-                {'subscription': subscription})
-
-    return HttpResponseRedirect(r('subscriptions:detail',subscription.hashid))
-    # return HttpResponseRedirect('/inscricao/{}/'.format(subscription.pk))
-
-def detail(request, hashid):
-    try:
-        subscription = Subscription.objects.get(hashid=hashid)
-    except Subscription.DoesNotExist:
-        raise Http404
-
-    return render(request, 'subscriptions/subscription_detail.html', {'subscription': subscription})
-
-def _send_email(subject, from_, to, template_name, context):
-    body = render_to_string(template_name, context)
-    send_mail(subject, body, from_, [from_, to])
+class DescriptionDetailView(DetailView):
+    def get_object(self, **kwargs):
+        object = get_object_or_404(Subscription, hashid=self.kwargs['hashid'])
+        return object

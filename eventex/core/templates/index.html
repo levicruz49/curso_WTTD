@@ -62,7 +62,7 @@
     <div>
         <div class="speakers text-aling-center row desktop-8 padding-bottom-2 container">
             <h2>Palestrante Convidados</h2>
-            {% for speaker in speakers %}
+            {% for speaker in speaker_list %}
                 <div class="desktop-4">
                     <img src="{{ speaker.photo}}" alt="">
                     <h4><a href="{{ speaker.get_absolute_url }}">
